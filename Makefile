@@ -4,9 +4,9 @@ objdir = obj
 incdir = src/include
 
 CXX = gcc
-CXXFLAGS = -Wall -pedantic
+CXXFLAGS = -Wall -Wpedantic
 
-start_sources = aucont_start.c start_options.c
+start_sources = aucont_start.c start_options.c init.c
 start_objects = $(start_sources:.c=.o)
 
 all: $(bindir) $(objdir) aucont_start
