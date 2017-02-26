@@ -18,6 +18,6 @@ struct cmd_arg {
     struct list_head args;
 };
 
-void get_start_opts(struct start_opts *, int, char **);
+void get_start_options(struct start_opts *, int argc, char *argv[]);
 
 #endif // __START_OPTIONS_H__
