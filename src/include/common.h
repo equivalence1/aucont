@@ -6,4 +6,6 @@
 #define container_of(ptr, type, member) \
     (type *)((char *)(ptr) - offsetof(type, member))
 
+void print_errno();
+
 #endif // __COMMON_H__

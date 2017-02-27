@@ -1,5 +1,5 @@
 #ifndef __START_OPTIONS_H__
-#define __START_OPTOONS_H__
+#define __START_OPTIONS_H__
 
 #include "list.h"
 
