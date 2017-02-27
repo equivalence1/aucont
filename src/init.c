@@ -2,6 +2,7 @@
 
 #include <init.h>
 #include <common.h>
+#include <uts.h>
 
 #include <sys/types.h>
 #include <sched.h>
@@ -14,7 +15,6 @@
 
 static const char *PROCEED = "proceed";
 static const char *FAIL = "fail";
-static const char *HOSTNAME = "container";
 static const size_t CHILD_STACK_SIZE = 8 * 1024 * 1024; // 8MB
 static const int CLONE_FLAGS = SIGCHLD
         | CLONE_NEWIPC
@@ -47,9 +47,12 @@ err:
 static
 int init(void *arg)
 {
+    log_setup;
+
     struct init_info *info = (struct init_info *)arg;
 
-    sethostname(HOSTNAME, strlen(HOSTNAME));
+    if (setup_hostname() < 0)
+        exit(EXIT_FAILURE);
 
     char hostname[15];
     gethostname(hostname, 15);

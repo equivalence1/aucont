@@ -10,6 +10,8 @@
 
 int setup_user_mappings(struct init_info *info)
 {
+    log_setup;
+
     int uid;
     char buff[30];
     
