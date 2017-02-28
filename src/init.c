@@ -3,6 +3,7 @@
 #include <init.h>
 #include <common.h>
 #include <uts.h>
+#include <pid_ns.h>
 
 #include <sys/types.h>
 #include <sched.h>
@@ -47,21 +48,30 @@ err:
 static
 int init(void *arg)
 {
-    log_setup;
+    LOG_SETUP;
 
     struct init_info *info = (struct init_info *)arg;
 
     if (setup_hostname() < 0)
         exit(EXIT_FAILURE);
 
-    char hostname[15];
-    gethostname(hostname, 15);
+    if (mount_proc() < 0) {
+        printf("Could not mount new proc fs.\n");
+        exit(EXIT_FAILURE);
+    }
 
     if (wait_to_proceed(info->pipe_fds[0]) < 0)
         exit(EXIT_FAILURE);
 
+
+
+    char hostname[15];
+    gethostname(hostname, 15);
+
     printf("my hostname is '%s', my pid is %d, my uid is %d\n", hostname, getpid(), getuid());
     execl("/bin/sh", "/bin/sh", NULL);
+
+
 
     return 0;
 }

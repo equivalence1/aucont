@@ -7,7 +7,7 @@
 #define container_of(ptr, type, member) \
     (type *)((char *)(ptr) - offsetof(type, member))
 
-#define log_setup \
+#define LOG_SETUP \
     printf("performing setup: %s\n", __func__);
 
 void print_errno();

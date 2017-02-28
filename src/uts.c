@@ -9,7 +9,7 @@ static const char *HOSTNAME = "container";
 
 int setup_hostname()
 {
-    log_setup;
+    LOG_SETUP;
 
     int ret = sethostname(HOSTNAME, strlen(HOSTNAME));
     if (ret < 0)
