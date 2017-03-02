@@ -1,8 +1,9 @@
 #define _GNU_SOURCE
 
 #include <pid_ns.h>
-#include <stdlib.h>
 #include <common.h>
+
+#include <stdlib.h>
 
 int mount_proc()
 {

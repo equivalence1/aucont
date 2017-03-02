@@ -7,6 +7,7 @@ struct init_info {
     int pid;
     int pipe_fds[2];
     struct start_opts *opts;
+    const char *rootfs_path;
 };
 
 int clone_container_init(struct init_info *);

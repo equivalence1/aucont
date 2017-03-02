@@ -4,6 +4,7 @@
 #include <common.h>
 #include <uts.h>
 #include <pid_ns.h>
+#include <mount_ns.h>
 
 #include <sys/types.h>
 #include <sched.h>
@@ -52,25 +53,37 @@ int init(void *arg)
 
     struct init_info *info = (struct init_info *)arg;
 
-    if (setup_hostname() < 0)
+    if (wait_to_proceed(info->pipe_fds[0]) < 0)
         exit(EXIT_FAILURE);
 
-    if (mount_proc() < 0) {
-        printf("Could not mount new proc fs.\n");
+    if (setup_hostname() < 0) {
+        printf("Could not setup new host name\n");
         exit(EXIT_FAILURE);
     }
 
-    if (wait_to_proceed(info->pipe_fds[0]) < 0)
+    if (mount_rootfs(info->rootfs_path) < 0) {
+        printf("Could not mount new rootfs\n");
         exit(EXIT_FAILURE);
+    }
+
+    if (mount_proc() < 0) {
+        printf("Could not mount new proc\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (mount_sysfs() < 0) {
+        printf("Could not mount new sysfs\n");
+        exit(EXIT_FAILURE);
+    }
 
 
 
     char hostname[15];
     gethostname(hostname, 15);
 
-    printf("my hostname is '%s', my pid is %d, my uid is %d\n", hostname, getpid(), getuid());
-    execl("/bin/sh", "/bin/sh", NULL);
+    printf("my hostname is '%s', my pid is %d, my uid is %d, my gid is %d\n", hostname, getpid(), getuid(), getgid());
 
+    execl("/bin/strace", "/bin/strace", NULL);
 
 
     return 0;
@@ -84,10 +97,14 @@ int clone_container_init(struct init_info *info)
     stack = (void *)((char *)stack + CHILD_STACK_SIZE);
     if (stack == NULL)
         goto err;
-    if ((info->pid = clone(init, stack, CLONE_FLAGS, info)) < 0)
+    if ((info->pid = clone(init, stack, CLONE_FLAGS, info)) < 0) {
+        free(stack);
         goto err;
-    if (close(info->pipe_fds[0]) < 0)
+    }
+    if (close(info->pipe_fds[0]) < 0) {
+        free(stack);
         goto err;
+    }
 
     return 0;
 

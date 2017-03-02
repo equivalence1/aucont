@@ -3,6 +3,7 @@
 #include <start_options.h>
 #include <init.h>
 #include <user_ns.h>
+#include <mount_ns.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -17,12 +18,23 @@ int main(int argc, char *argv[])
 {
     get_start_options(&opts, argc, argv);
     init.opts = &opts;
+    const char *rootfs_path;
+
+    rootfs_path = ungz_image(opts.image_path);
+    if (rootfs_path == NULL)
+        exit(EXIT_FAILURE);
+    init.rootfs_path = rootfs_path;
 
     int ret = clone_container_init(&init);
     if (ret < 0)
         exit(EXIT_FAILURE);
 
-    ret = setup_user_mappings(&init);
+    ret = setup_uid_mappings(&init);
+    if (ret < 0)
+        goto err;
+
+    // for some reason gid asks for sudo, although uid does not
+//    ret = setup_gid_mappings(&init);
     if (ret < 0)
         goto err;
 

@@ -6,7 +6,7 @@ incdir = src/include
 CXX = gcc
 CXXFLAGS = -Wall -Wpedantic
 
-start_sources = aucont_start.c start_options.c init.c user_ns.c common.c uts.c pid_ns.c
+start_sources = aucont_start.c start_options.c init.c user_ns.c common.c uts.c pid_ns.c mount_ns.c
 start_objects = $(start_sources:.c=.o)
 
 all: $(bindir) $(objdir) aucont_start
