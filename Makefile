@@ -26,5 +26,5 @@ aucont_start: $(start_objects)
 
 .PHONY: clean
 clean:
-	rm -rf $(bindir)
+	rm -f $(bindir)/aucont_start
 	rm -rf $(objdir)
