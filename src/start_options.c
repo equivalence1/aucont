@@ -74,7 +74,10 @@ error_t parse_opt(int key, char *arg, struct argp_state *state)
             opts->verbose = 1;
         case ARGP_KEY_ARG:
             return parse_key_arg(arg, state);
-        break;
+        case ARGP_KEY_END:
+            if (state->arg_num < 2)
+                argp_usage(state);
+            break;
         default:
             break;
     }
