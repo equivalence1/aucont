@@ -4,12 +4,14 @@
 #include <init.h>
 #include <user_ns.h>
 #include <mount_ns.h>
+#include <cgroups.h>
 
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 struct start_opts opts;
 struct init_info init;
@@ -37,6 +39,12 @@ int main(int argc, char *argv[])
 //    ret = setup_gid_mappings(&init);
     if (ret < 0)
         goto err;
+
+    ret = restrict_cpu_usage(opts.cpu, init.pid);
+    if (ret < 0) {
+        printf("Could not setup cgroup for cpu usage.\n");
+        goto err;
+    }
 
     ret = notify_init_proceed(init.pipe_fds[1]);
     if (ret < 0) {

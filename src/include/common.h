@@ -11,5 +11,6 @@
     printf("performing setup: %s\n", __func__);
 
 void print_errno();
+int write_to_file(const char *path, const char *buff);
 
 #endif // __COMMON_H__
