@@ -4,12 +4,18 @@
 #include <common.h>
 
 #include <stdlib.h>
+#include <sys/mount.h>
+#include <stdio.h>
 
 int mount_proc()
 {
     LOG_SETUP;
-    int ret = system("mount -t proc proc /proc");
-    if (ret < 0)
+
+    if (mount("nodev", "/proc", "proc", 0, NULL) < 0) {
+        printf("Could not mount proc\n");
         print_errno();
-    return ret;
+        return -1;
+    }
+
+    return 0;
 }
