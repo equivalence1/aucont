@@ -11,7 +11,9 @@ int mount_proc()
 {
     LOG_SETUP;
 
-    if (mount("nodev", "/proc", "proc", 0, NULL) < 0) {
+    // FIXME for some reason mount("nodev", "/proc", "proc", 0, NULL) gives -EPERM
+    // so using system for now
+    if (system("/bin/mount -t proc /proc proc") < 0) {
         printf("Could not mount proc\n");
         print_errno();
         return -1;

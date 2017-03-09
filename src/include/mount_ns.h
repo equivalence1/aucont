@@ -3,6 +3,7 @@
 
 int mount_rootfs(const char *);
 int mount_sysfs();
-const char *ungz_image(const char *);
+int get_image_dir(const char *, char *);
+int ungz_image(const char *, int, char *);
 
 #endif // __MOUNT_NS_H__

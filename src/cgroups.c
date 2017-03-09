@@ -68,23 +68,13 @@ err:
 }
 
 static
-int cpu_hierarchy_already_mounted()
-{
-    // TODO check in with /proc/mounts
-    return 0;
-}
-
-static
 int mount_cpu_hierarchy()
 {
     LOG_SETUP;
 
-    if (cpu_hierarchy_already_mounted())
-        return 0;
-
     char cmd[200];
     // FIXME cpu and cpuacct might be separated
-    snprintf(cmd, sizeof cmd, "mount -t cgroup -o cpu,cpuacct aucont_cpu_cgroup %s", HIERARCHY_PATH);
+    snprintf(cmd, sizeof cmd, "sudo mount -t cgroup -o cpu,cpuacct aucont_cpu_cgroup %s", HIERARCHY_PATH);
 
     if (system(cmd) != 0) {
         printf("Could not mount cgroup hierarchy\n");
@@ -143,11 +133,12 @@ int restrict_cpu_usage(int percentage, int init_pid)
 {
     LOG_SETUP;
 
+    int exists = 0;
     char cg_path[100];
     
-    if (create_cpu_hierarchy() < 0)
+    if ((exists = create_cpu_hierarchy()) < 0)
         return -1;
-    if (mount_cpu_hierarchy() < 0)
+    if (exists == 0 && mount_cpu_hierarchy() < 0)
         return -1;
     if (create_cpu_cg(init_pid, cg_path, sizeof cg_path) < 0)
         return -1;

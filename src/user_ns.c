@@ -12,25 +12,14 @@ int setup_uid_mappings(struct init_info *info)
 {
     LOG_SETUP;
 
-    int uid;
-    char buff[30];
-    
-    if ((uid = getuid()) < 0) {
-        printf("Could not get your current user id.\n");
+    char uid_map[30];
+
+    if (snprintf(uid_map, sizeof uid_map, "/proc/%d/uid_map", info->pid) < 0)
+        goto err;
+    if (write_to_file(uid_map, "0 1000 1\n") < 0) {
+        printf("Could not setup uid mappings\n");
         goto err;
     }
-
-    if (snprintf(buff, sizeof buff, "/proc/%d/uid_map", info->pid) < 0)
-        goto err;
-    int fd = open(buff, O_WRONLY);
-    if (fd < 0)
-        goto err;
-    if (snprintf(buff, sizeof buff, "%d %d 1", 0, uid) < 0)
-        goto err;
-    if (write(fd, buff, strlen(buff)) < 0)
-        goto err;
-    if (close(fd) < 0)
-        goto err;
 
     return 0;
 
@@ -43,25 +32,13 @@ int setup_gid_mappings(struct init_info *info)
 {
     LOG_SETUP;
 
-    int gid;
-    char buff[30];
+    char gid_map[30];
+    snprintf(gid_map, sizeof gid_map, "/proc/%d/gid_map", info->pid);
     
-    if ((gid = getgid()) < 0) {
-        printf("Could not get your current user group id.\n");
+    if (write_to_file(gid_map, "0 1000 1\n") < 0) {
+        printf("Could not setup gid mappings\n");
         goto err;
     }
-
-    if (snprintf(buff, sizeof buff, "/proc/%d/gid_map", info->pid) < 0)
-        goto err;
-    int fd = open(buff, O_WRONLY);
-    if (fd < 0)
-        goto err;
-    if (snprintf(buff, sizeof buff, "%d %d 1", 0, gid) < 0)
-        goto err;
-    if (write(fd, buff, strlen(buff)) < 0)
-        goto err;
-    if (close(fd) < 0)
-        goto err;
 
     return 0;
 

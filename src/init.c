@@ -6,6 +6,8 @@
 #include <pid_ns.h>
 #include <mount_ns.h>
 
+#include <user_ns.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <stdio.h>
@@ -27,19 +29,12 @@ static const int CLONE_FLAGS = SIGCHLD
         | CLONE_NEWNET;
 
 static
-int wait_to_proceed(int fd)
+int get_next_msg(int fd, char *buff, int len)
 {
-    char buff[20];
-
-    if (read(fd, buff, sizeof buff) < 0)
+    if (read(fd, buff, len) < 0)
         goto err;
 
-    if (!strcmp(PROCEED, buff))
-        return 0;
-    else {
-        printf("While waiting to proceed expected '%s' but found '%s'.\nAboring.\n", PROCEED, buff);
-        return -1;
-    }
+    return 0;
 
 err:
     print_errno();
@@ -47,14 +42,39 @@ err:
 }
 
 static
+int wait_to_proceed(int fd)
+{
+    char buff[20];
+
+    if (get_next_msg(fd, buff, sizeof buff) < 0)
+        return -1;
+
+    if (!strcmp(PROCEED, buff))
+        return 0;
+    else {
+        printf("While waiting to proceed expected '%s' but found '%s'.\nAboring.\n", PROCEED, buff);
+        return -1;
+    }
+}
+
+static
 int init(void *arg)
 {
     LOG_SETUP;
 
+    char rootfs_path[100];
     struct init_info *info = (struct init_info *)arg;
 
-    if (wait_to_proceed(info->pipe_fds[0]) < 0)
+    if (get_next_msg(info->pipe_fds[0], rootfs_path, sizeof rootfs_path) < 0) {
+        printf("Error while expecting image dir path\n");
         exit(EXIT_FAILURE);
+    }
+    info->rootfs_path = rootfs_path;
+
+    if (wait_to_proceed(info->pipe_fds[0]) < 0) {
+        printf("Can not proceed, aborting\n");
+        exit(EXIT_FAILURE);
+    }
 
     if (setup_hostname() < 0) {
         printf("Could not setup new host name\n");
@@ -81,7 +101,7 @@ int init(void *arg)
     char hostname[15];
     gethostname(hostname, 15);
 
-    printf("my hostname is '%s', my pid is %d, my uid is %d, my gid is %d\n", hostname, getpid(), getuid(), getgid());
+    printf("my hostname is '%s', my pid is %d, my uid is %d, my gid is %d, my euid is %d\n", hostname, getpid(), getuid(), getgid(), geteuid());
 
     execl("/bin/strace", "/bin/strace", NULL);
 
@@ -113,8 +133,7 @@ err:
     return -1;
 }
 
-static
-int notify_init(int fd, const char *msg)
+int send_init(int fd, const char *msg)
 {
     int ret = write(fd, msg, strlen(msg));
     if (ret < 0)
@@ -124,12 +143,12 @@ int notify_init(int fd, const char *msg)
 
 int notify_init_proceed(int fd)
 {
-    return notify_init(fd, PROCEED);
+    return send_init(fd, PROCEED);
 }
 
 int notify_init_fail(int fd)
 {
-    return notify_init(fd, FAIL);
+    return send_init(fd, FAIL);
 }
 
 void kill_init(int pid)

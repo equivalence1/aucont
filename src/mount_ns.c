@@ -28,7 +28,7 @@ int mount_rootfs(const char *new_root_path)
     char put_old_root[strlen(new_root_path) + 10];
     if (snprintf(put_old_root, sizeof put_old_root, "%s%s", new_root_path, OLD_SUFFIX) < 0)
         goto err;
-    if (mkdir(put_old_root, S_IFDIR) < 0) {
+    if (mkdir(put_old_root, 0777) < 0) {
         printf("Could not create directory for old root\n");
         goto err;
     }
@@ -68,14 +68,13 @@ int mount_sysfs()
 {
     LOG_SETUP;
 
-    int ret = system("mount -t sysfs sys /sys");
+    int ret = system("/bin/mount -t sysfs sys /sys");
     if (ret < 0)
         print_errno();
     return ret;
 }
 
-static
-const char *get_image_dir(const char *tmp_dir)
+int get_image_dir(const char *tmp_dir, char *buff)
 {
     DIR *d = opendir(tmp_dir);
     if (d == NULL) {
@@ -88,49 +87,47 @@ const char *get_image_dir(const char *tmp_dir)
         if (dir->d_name[0] != '.') {
             closedir(d);
             const int len = strlen(tmp_dir) + strlen(dir->d_name) + 2;
-            char *image_dir = (char *)malloc(len);
-            if (snprintf(image_dir, len, "%s/%s", tmp_dir, dir->d_name) < 0) {
-                free(image_dir);
+            if (snprintf(buff, len, "%s/%s", tmp_dir, dir->d_name) < 0)
                 goto err;
-            }
-            printf("image dir is '%s'\n", image_dir);
-            return image_dir;
+            printf("image dir is '%s'\n", buff);
+            return 0;
         }
     }
 
     closedir(d);
     printf("image dir is empty\n");
 
-    return NULL;
+    return -1;
 
 err:
     print_errno();
-    return NULL;
+    return -1;
 }
 
-const char *ungz_image(const char *img_path)
+int ungz_image(const char *img_path, int init_pid, char *buff)
 {
     LOG_SETUP;
 
-    char template[] = "/tmp/aucont_image.XXXXXX";
-    char *tmp_dir = mkdtemp(template);
+    char tmp_dir[100]; 
+    snprintf(tmp_dir, sizeof tmp_dir, "/tmp/aucont_image_%d", init_pid);
     char untar_command[strlen(img_path) + strlen(tmp_dir) + 15];
 
-    if (tmp_dir == NULL) {
-        printf("Could not craete temp dir for image");
+    if (mkdir(tmp_dir, 0777) < 0) {
+        printf("Could not craete temp dir for image\n");
         goto err;
     }
 
-    if (snprintf(untar_command, sizeof untar_command, "tar -xzf %s -C %s", img_path, tmp_dir) < 0)
-        goto err;
+    snprintf(untar_command, sizeof untar_command, "tar -xzf %s -C %s", img_path, tmp_dir);
     if (system(untar_command) < 0) {
         printf("Could not extract image\n");
         goto err;
     }
 
-    return get_image_dir(tmp_dir);
+    get_image_dir(tmp_dir, buff);
+
+    return 0;
 
 err:
     print_errno();
-    return NULL;
+    return -1;
 }
