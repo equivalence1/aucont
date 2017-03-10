@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
     get_start_options(&opts, argc, argv);
     init.opts = &opts;
 
+    setuid(0);
+    setgid(0);
+
     int ret = clone_container_init(&init);
     if (ret < 0)
         exit(EXIT_FAILURE);

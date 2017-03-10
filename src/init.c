@@ -76,6 +76,11 @@ int init(void *arg)
         exit(EXIT_FAILURE);
     }
 
+    setuid(0);
+    seteuid(0);
+    setgid(0);
+    setegid(0);
+
     if (setup_hostname() < 0) {
         printf("Could not setup new host name\n");
         exit(EXIT_FAILURE);
