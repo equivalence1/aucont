@@ -48,6 +48,17 @@ int mount_rootfs(const char *new_root_path)
         printf("Could not change root directory\n");
         goto err;
     }
+    // for some reason we can only mount new proc/sysfs
+    // before old root was unmounted
+    // TODO: find explanation for this
+    if (mount("nodev", "/proc", "proc", 0, NULL) < 0) {
+        printf("Could not mount new proc\n");
+        goto err;
+    }
+    if (mount("nodev", "/sys", "sysfs", 0, NULL) < 0) {
+        printf("Could not mount new sysfs\n");
+        goto err;
+    }
     if (umount2(OLD_SUFFIX, MNT_DETACH) < 0) {
         printf("Could not unmount old root\n");
         goto err;
@@ -62,16 +73,6 @@ int mount_rootfs(const char *new_root_path)
 err:
     print_errno();
     return -1;
-}
-
-int mount_sysfs()
-{
-    LOG_SETUP;
-
-    int ret = system("/bin/mount -t sysfs sys /sys");
-    if (ret < 0)
-        print_errno();
-    return ret;
 }
 
 int get_image_dir(const char *tmp_dir, char *buff)

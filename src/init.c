@@ -5,7 +5,6 @@
 #include <uts.h>
 #include <pid_ns.h>
 #include <mount_ns.h>
-
 #include <user_ns.h>
 
 #include <sys/types.h>
@@ -91,16 +90,6 @@ int init(void *arg)
         exit(EXIT_FAILURE);
     }
 
-    if (mount_proc() < 0) {
-        printf("Could not mount new proc\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if (mount_sysfs() < 0) {
-        printf("Could not mount new sysfs\n");
-        exit(EXIT_FAILURE);
-    }
-
 
 
     char hostname[15];
@@ -108,7 +97,7 @@ int init(void *arg)
 
     printf("my hostname is '%s', my pid is %d, my uid is %d, my gid is %d, my euid is %d\n", hostname, getpid(), getuid(), getgid(), geteuid());
 
-    execl("/bin/strace", "/bin/strace", NULL);
+    execl("/bin/hello", "/bin/hello", NULL);
 
 
     return 0;
