@@ -1,0 +1,19 @@
+#!/usr/bin/env python2
+
+import sys
+import os
+import signal
+import re
+
+image_pattern = re.compile("^aucont_image_\d+$")
+
+print("CONTAINER ID")
+
+for d in os.listdir("/tmp"):
+    if os.path.isdir("/tmp/" + d) and image_pattern.match(d):
+        pid = int(d.split("_")[2])
+        try:
+            os.kill(pid, 0)
+            print(pid)
+        except:
+            pass
