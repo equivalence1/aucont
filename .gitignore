@@ -7,3 +7,4 @@ test/
 
 !bin/aucont_init
 !bin/aucont_list
+!bin/veth_setup.sh

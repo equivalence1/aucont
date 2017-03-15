@@ -5,6 +5,7 @@
 #include <user_ns.h>
 #include <mount_ns.h>
 #include <cgroups.h>
+#include <netns.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -54,6 +55,10 @@ int main(int argc, char *argv[])
         printf("Could not setup cgroup for cpu usage.\n");
         goto err;
     }
+
+    ret = setup_veth_pair(init.pid);
+    if (ret < 0)
+        goto err;
 
     ret = notify_init_proceed(init.pipe_fds[1]);
     if (ret < 0) {
