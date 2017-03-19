@@ -4,7 +4,7 @@ objdir = obj
 incdir = src/include
 
 CXX = gcc
-CXXFLAGS = -Wall -Wpedantic
+CXXFLAGS = -Wall -Wpedantic -std=gnu11
 
 start_sources = aucont_start.c start_options.c init.c user_ns.c common.c uts.c pid_ns.c mount_ns.c cgroups.c netns.c
 start_objects = $(start_sources:.c=.o)
