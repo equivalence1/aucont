@@ -6,6 +6,7 @@
 #include <pid_ns.h>
 #include <mount_ns.h>
 #include <user_ns.h>
+#include <list.h>
 
 #include <sys/types.h>
 #include <sched.h>
@@ -90,15 +91,23 @@ int init(void *arg)
         exit(EXIT_FAILURE);
     }
 
+    printf("All setup done. Executing user command\n");
 
+    const char *cmd = info->opts->cmd;
+    const char *args[list_length(info->opts->cmd_args) + 2];
+    args[0] = cmd;
 
-    char hostname[15];
-    gethostname(hostname, 15);
+    int i = 1;
+    struct list_head *pos;
+    list_for_each(pos, info->opts->cmd_args)
+        args[i++] = ((struct cmd_arg *)container_of(pos, struct cmd_arg, args))->arg;
+    args[i] = NULL;
 
-    printf("my hostname is '%s', my pid is %d, my uid is %d, my gid is %d, my euid is %d\n", hostname, getpid(), getuid(), getgid(), geteuid());
-
-    execl("/bin/hello", "/bin/hello", NULL);
-
+    if (execve(cmd, (char * const*)args, NULL) < 0) {
+        printf("Could not execute user's command\n");
+        print_errno();
+        exit(EXIT_FAILURE);
+    }
 
     return 0;
 }
