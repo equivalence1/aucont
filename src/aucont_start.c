@@ -6,6 +6,7 @@
 #include <mount_ns.h>
 #include <cgroups.h>
 #include <netns.h>
+#include <common.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -24,6 +25,14 @@ int main(int argc, char *argv[])
 
     setuid(0);
     setgid(0);
+
+    if (opts.detached) {
+        printf("daemonizing\n");
+        if (daemon(0, 0) < 0) {
+            printf("Could not daemonize container\n");
+            print_errno();
+        }
+    }
 
     int ret = clone_container_init(&init);
     if (ret < 0)
@@ -68,8 +77,10 @@ int main(int argc, char *argv[])
         goto err;
     }
 
-    int status;
-    waitpid(init.pid, &status, 0);
+    if (opts.detached == 0) {
+        int status;
+        waitpid(init.pid, &status, 0);
+    }
     exit(EXIT_SUCCESS);
 
 err:
