@@ -56,9 +56,11 @@ int main(int argc, char *argv[])
         goto err;
     }
 
-    ret = setup_veth_pair(init.pid);
-    if (ret < 0)
-        goto err;
+    if (opts.net != NULL) {
+        ret = setup_veth_pair(init.pid, opts.net);
+        if (ret < 0)
+            goto err;
+    }
 
     ret = notify_init_proceed(init.pipe_fds[1]);
     if (ret < 0) {
