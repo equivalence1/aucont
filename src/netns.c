@@ -25,7 +25,7 @@ int setup_veth_pair(int pid, const char *ip)
     bin_dir[i + 1] = 0;
     snprintf(veth_run, sizeof veth_run, "%sveth_setup.sh %d %s", bin_dir, pid, ip);
 
-    if (system(veth_run) < 0) {
+    if (system(veth_run) != 0) {
         printf("Failed to setup veth pair\n");
         goto err;
     }
