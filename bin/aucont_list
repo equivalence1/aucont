@@ -1,19 +1,13 @@
 #!/usr/bin/env python2
 
-import sys
 import os
-import signal
 import re
 
+pids = [int(pid) for pid in os.listdir('/proc') if pid.isdigit()]
 image_pattern = re.compile("^aucont_image_\d+$")
-
-print("CONTAINER ID")
 
 for d in os.listdir("/tmp"):
     if os.path.isdir("/tmp/" + d) and image_pattern.match(d):
         pid = int(d.split("_")[2])
-        try:
-            os.kill(pid, 0)
+        if pid in pids:
             print(pid)
-        except:
-            pass
