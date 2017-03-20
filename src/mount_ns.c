@@ -119,13 +119,13 @@ int copy_image(const char *img_path, int init_pid, char *buff)
         goto err;
     }
 
-    snprintf(tar_command, sizeof tar_command, "tar -czvf /tmp/image_%d.tar.gz -C %s ../$(basename %s)", init_pid, img_path, img_path);
+    snprintf(tar_command, sizeof tar_command, "tar -czvf /tmp/aucont_image_%d.tar.gz -C %s ../$(basename %s)", init_pid, img_path, img_path);
     if (system(tar_command) != 0) {
         printf("Could not copy image dir\n");
         goto err;
     }
 
-    snprintf(untar_command, sizeof untar_command, "tar -xzvf /tmp/image_%d.tar.gz -C %s", init_pid, tmp_dir);
+    snprintf(untar_command, sizeof untar_command, "tar -xzvf /tmp/aucont_image_%d.tar.gz -C %s", init_pid, tmp_dir);
     if (system(untar_command) != 0) {
         printf("Could not extract image\n");
         goto err;
