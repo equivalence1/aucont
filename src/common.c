@@ -60,12 +60,10 @@ int execute_bin_relative(const char *relative_path, const char *args)
         goto err;
     }
 
-    printf("bin_dir: %s\n", bin_dir);
     int i = strlen(bin_dir);
     while (bin_dir[i] != '/')
         i--;
     bin_dir[i + 1] = 0;
-    printf("bin_dir: %s\n", bin_dir);
     snprintf(run, sizeof run, "%s%s %s", bin_dir, relative_path, args);
 
     if (system(run) != 0) {
