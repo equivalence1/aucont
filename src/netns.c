@@ -12,27 +12,14 @@ int setup_veth_pair(int pid, const char *ip)
 {
     LOG_SETUP;
 
-    char bin_dir[120];
-    char veth_run[120];
-    if (readlink("/proc/self/exe", bin_dir, sizeof bin_dir) < 0) {
-        printf("Could not resolve path to current executable\n");
-        goto err;
-    }
+    int ret;
+    char args[30];
 
-    int i = strlen(bin_dir);
-    while (bin_dir[i] != '/')
-        i--;
-    bin_dir[i + 1] = 0;
-    snprintf(veth_run, sizeof veth_run, "%sveth_setup.sh %d %s", bin_dir, pid, ip);
+    snprintf(args, sizeof args, "%d %s", pid, ip);
+    ret = execute_bin_relative("veth_setup.sh", args);
 
-    if (system(veth_run) != 0) {
-        printf("Failed to setup veth pair\n");
-        goto err;
-    }
+    if (ret < 0)
+        printf("Could not setup veth pair\n");
 
-    return 0;
-
-err:
-    print_errno();
-    return -1;
+    return ret;
 }

@@ -12,5 +12,6 @@
 
 void print_errno();
 int write_to_file(const char *path, const char *buff);
+int execute_bin_relative(const char *relative_path, const char *args);
 
 #endif // __COMMON_H__
