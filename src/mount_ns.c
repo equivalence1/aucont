@@ -29,42 +29,42 @@ int mount_rootfs(const char *new_root_path)
     if (snprintf(put_old_root, sizeof put_old_root, "%s%s", new_root_path, OLD_SUFFIX) < 0)
         goto err;
     if (mkdir(put_old_root, 0777) < 0) {
-        printf("Could not create directory for old root\n");
+        pr_err("%s", "Could not create directory for old root\n");
         goto err;
     }
     if (mount(new_root_path, new_root_path, "bind", MS_BIND | MS_REC, NULL) < 0) {
-        printf("Could not bind-mount %s to %s\n", new_root_path, new_root_path);
+        pr_err("Could not bind-mount %s to %s\n", new_root_path, new_root_path);
         goto err;
     }
     if (pivot_root(new_root_path, put_old_root) < 0) {
-        printf("Faild to pivot_root\n");
+        pr_err("%s", "Faild to pivot_root\n");
         goto err;
     }
     if (chdir("/") < 0) {
-        printf("Could not change directory\n");
+        pr_err("%s", "Could not change directory\n");
         goto err;
     }
     if (chroot("/") < 0) {
-        printf("Could not change root directory\n");
+        pr_err("%s", "Could not change root directory\n");
         goto err;
     }
     // for some reason we can only mount new proc/sysfs
     // before old root was unmounted
     // TODO: find explanation for this
     if (mount("nodev", "/proc", "proc", 0, NULL) < 0) {
-        printf("Could not mount new proc\n");
+        pr_err("%s", "Could not mount new proc\n");
         goto err;
     }
     if (mount("nodev", "/sys", "sysfs", 0, NULL) < 0) {
-        printf("Could not mount new sysfs\n");
+        pr_err("%s", "Could not mount new sysfs\n");
         goto err;
     }
     if (umount2(OLD_SUFFIX, MNT_DETACH) < 0) {
-        printf("Could not unmount old root\n");
+        pr_err("%s", "Could not unmount old root\n");
         goto err;
     }
     if (rmdir(OLD_SUFFIX) < 0) {
-        printf("Could not delete %s\n", OLD_SUFFIX);
+        pr_err("Could not delete %s\n", OLD_SUFFIX);
         goto err;
     }
 
@@ -79,7 +79,7 @@ int get_image_dir(const char *tmp_dir, char *buff)
 {
     DIR *d = opendir(tmp_dir);
     if (d == NULL) {
-        printf("Could not open temp dir (%s)\n", tmp_dir);
+        pr_err("Could not open temp dir (%s)\n", tmp_dir);
         goto err;
     }
 
@@ -90,13 +90,13 @@ int get_image_dir(const char *tmp_dir, char *buff)
             const int len = strlen(tmp_dir) + strlen(dir->d_name) + 2;
             if (snprintf(buff, len, "%s/%s", tmp_dir, dir->d_name) < 0)
                 goto err;
-            printf("image dir is '%s'\n", buff);
+            pr_info("image dir is '%s'\n", buff);
             return 0;
         }
     }
 
     closedir(d);
-    printf("image dir is empty\n");
+    pr_err("%s", "image dir is empty\n");
 
     return -1;
 
@@ -115,19 +115,19 @@ int copy_image(const char *img_path, int init_pid, char *buff)
     char untar_command[200];
 
     if (mkdir(tmp_dir, 0777) < 0) {
-        printf("Could not craete temp dir for image\n");
+        pr_err("%s", "Could not craete temp dir for image\n");
         goto err;
     }
 
     snprintf(tar_command, sizeof tar_command, "tar -czvf /tmp/aucont_image_%d.tar.gz -C %s ../$(basename %s)", init_pid, img_path, img_path);
     if (system(tar_command) != 0) {
-        printf("Could not copy image dir\n");
+        pr_err("%s", "Could not copy image dir\n");
         goto err;
     }
 
     snprintf(untar_command, sizeof untar_command, "tar -xzvf /tmp/aucont_image_%d.tar.gz -C %s", init_pid, tmp_dir);
     if (system(untar_command) != 0) {
-        printf("Could not extract image\n");
+        pr_err("%s", "Could not extract image\n");
         goto err;
     }
 

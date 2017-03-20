@@ -27,7 +27,7 @@ int create_cpu_hierarchy()
 
     if (mkdir(HIERARCHY_PATH, 0777) < 0) {
         if (errno != EEXIST) {   
-            printf("Could not create directory '%s' for cpu cgroup hierarchy\n", HIERARCHY_PATH);
+            pr_err("Could not create directory '%s' for cpu cgroup hierarchy\n", HIERARCHY_PATH);
             goto err;
         } else
             return 1;
@@ -49,12 +49,12 @@ int create_cpu_cg(int init_pid, char *path, int len)
     snprintf(cg_path, sizeof cg_path, "%s/cg_%d", HIERARCHY_PATH, init_pid);
 
     if (mkdir(cg_path, 0777) < 0) {
-        printf("Could not create directory '%s' for cpu cgroup\n", cg_path);
+        pr_err("Could not create directory '%s' for cpu cgroup\n", cg_path);
         goto err;
     }
 
     if (len < (int)strlen(cg_path)) {
-        printf("string '%s' is longer than %d bytes\n", cg_path, len);
+        pr_err("string '%s' is longer than %d bytes\n", cg_path, len);
         return -1;
     }
 
@@ -77,7 +77,7 @@ int mount_cpu_hierarchy()
     snprintf(cmd, sizeof cmd, "sudo mount -t cgroup -o cpu,cpuacct aucont_cpu_cgroup %s", HIERARCHY_PATH);
 
     if (system(cmd) != 0) {
-        printf("Could not mount cgroup hierarchy\n");
+        pr_err("%s", "Could not mount cgroup hierarchy\n");
         return -1;
     }
 
@@ -95,7 +95,7 @@ int move_init_to_cpu_cg(int init_pid, char *cg_path)
     snprintf(pid, sizeof pid, "%d", init_pid);
 
     if (write_to_file(tasks_path, pid) < 0) {
-        printf("Could not add init to a new cgroup\n");
+        pr_err("%s", "Could not add init to a new cgroup\n");
         return -1;
     }
 

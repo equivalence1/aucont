@@ -10,11 +10,10 @@ a aucont_stop.c which just calls this script and has suid set to 0
 
 import os
 import sys
-import shutil
 import signal
 
 pid = 0
-sig = signal.SIGINT
+sig = 15 # SIGINT
 
 def parse_args(args):
     global pid
@@ -26,7 +25,7 @@ def parse_args(args):
         return False
 
     if (len(args) > 2) and args[2].isdigit():
-        sig = signal.Signals(int(args[2]))
+        sig = int(args[2])
 
     return True
 

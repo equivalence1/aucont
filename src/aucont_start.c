@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
     init.opts = &opts;
 
     if (opts.detached) {
-        printf("daemonizing\n");
+        pr_info("%s", "daemonizing\n");
         if (daemon(0, 0) < 0) {
-            printf("Could not daemonize container\n");
+            pr_err("%s", "Could not daemonize container\n");
             print_errno();
         }
     }
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     setgid(0);
 
     if (send_init(init.pipe_fds[1], rootfs_path) < 0) {
-        printf("Could not send image dir path\n");
+        pr_err("%s", "Could not send image dir path\n");
         goto err;
     }
 
@@ -61,12 +61,9 @@ int main(int argc, char *argv[])
     if (ret < 0)
         goto err;
 
-    printf("uid: %d, euid: %d\n", getuid(), geteuid());
-    system("id");
-
     ret = restrict_cpu_usage(opts.cpu, init.pid);
     if (ret < 0) {
-        printf("Could not setup cgroup for cpu usage.\n");
+        pr_err("%s", "Could not setup cgroup for cpu usage.\n");
         goto err;
     }
 
@@ -78,7 +75,7 @@ int main(int argc, char *argv[])
 
     ret = notify_init_proceed(init.pipe_fds[1]);
     if (ret < 0) {
-        printf("Could not notify init to proceed.\nKilling init and aborting.\n");
+        pr_err("%s", "Could not notify init to proceed.\nKilling init and aborting.\n");
         goto err;
     }
 

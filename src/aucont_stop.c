@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     setuid(0);
     if (argc < 2) {
-        printf("Should provide ID of container\n");
+        pr_err("%s", "Should provide ID of container\n");
         return -1;
     }
     char args[100];
@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     if (argc == 3)
         snprintf(args, sizeof args, "%s %s", argv[1], argv[2]);
     if (execute_bin_relative("aucont_stop.py", args) < 0) {
-        printf("Oops, something went wrong\n");
+        pr_err("%s", "Oops, something went wrong\n");
         return -1;
     }
     return 0;

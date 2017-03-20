@@ -11,7 +11,7 @@
 
 void print_errno()
 {
-    printf("%s\n", strerror(errno));
+    pr_err("%s\n", strerror(errno));
 }
 
 /**
@@ -24,15 +24,15 @@ int write_to_file(const char *path, const char *buff)
 {
     int fd = open(path, O_RDWR);
     if (fd < 0) {
-        printf("Could not open file '%s' in read-write mode\n", path);
+        pr_err("Could not open file '%s' in read-write mode\n", path);
         goto err;
     }
     if (write(fd, buff, strlen(buff)) < 0) {
-        printf("Could not write to file '%s'\n", path);
+        pr_err("Could not write to file '%s'\n", path);
         goto err;
     }
     if (close(fd) < 0) {
-        printf("Warning: could not close file '%s'\n", path);
+        pr_warn("Warning: could not close file '%s'\n", path);
         return 1;
     }
 
@@ -56,7 +56,7 @@ int execute_bin_relative(const char *relative_path, const char *args)
     memset(run, 0, sizeof run);
 
     if (readlink("/proc/self/exe", bin_dir, sizeof bin_dir) < 0) {
-        printf("Could not resolve path to current executable\n");
+        pr_err("%s", "Could not resolve path to current executable\n");
         goto err;
     }
 
@@ -67,7 +67,7 @@ int execute_bin_relative(const char *relative_path, const char *args)
     snprintf(run, sizeof run, "%s%s %s", bin_dir, relative_path, args);
 
     if (system(run) != 0) {
-        printf("Failed to run '%s'\n", run);
+        pr_err("Failed to run '%s'\n", run);
         goto err;
     }
 

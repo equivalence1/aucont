@@ -1,4 +1,5 @@
 #include <start_options.h>
+#include <common.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,7 +26,7 @@ void set_default_options(struct start_opts *opts)
     opts->cmd = NULL;
     opts->cmd_args = (struct list_head *)malloc(sizeof(struct list_head));
     if (opts->cmd_args == NULL) {
-        printf("No mem.");
+        pr_err("%s", "No mem.");
         exit(EXIT_FAILURE);
     }
     INIT_LIST_HEAD(opts->cmd_args);

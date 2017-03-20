@@ -52,7 +52,7 @@ int wait_to_proceed(int fd)
     if (!strcmp(PROCEED, buff))
         return 0;
     else {
-        printf("While waiting to proceed expected '%s' but found '%s'.\nAboring.\n", PROCEED, buff);
+        pr_err("While waiting to proceed expected '%s' but found '%s'.\nAboring.\n", PROCEED, buff);
         return -1;
     }
 }
@@ -66,13 +66,13 @@ int init(void *arg)
     struct init_info *info = (struct init_info *)arg;
 
     if (get_next_msg(info->pipe_fds[0], rootfs_path, sizeof rootfs_path) < 0) {
-        printf("Error while expecting image dir path\n");
+        pr_err("%s", "Error while expecting image dir path\n");
         exit(EXIT_FAILURE);
     }
     info->rootfs_path = rootfs_path;
 
     if (wait_to_proceed(info->pipe_fds[0]) < 0) {
-        printf("Can not proceed, aborting\n");
+        pr_err("%s", "Can not proceed, aborting\n");
         exit(EXIT_FAILURE);
     }
 
@@ -82,16 +82,16 @@ int init(void *arg)
     setegid(0);
 
     if (setup_hostname() < 0) {
-        printf("Could not setup new host name\n");
+        pr_err("%s", "Could not setup new host name\n");
         exit(EXIT_FAILURE);
     }
 
     if (mount_rootfs(info->rootfs_path) < 0) {
-        printf("Could not mount new rootfs\n");
+        pr_err("%s", "Could not mount new rootfs\n");
         exit(EXIT_FAILURE);
     }
 
-    printf("All setup done. Executing user command\n");
+    pr_success("%s", "All setup done. Executing user command\n");
 
     const char *cmd = info->opts->cmd;
     const char *args[list_length(info->opts->cmd_args) + 2];
@@ -104,7 +104,7 @@ int init(void *arg)
     args[i] = NULL;
 
     if (execve(cmd, (char * const*)args, NULL) < 0) {
-        printf("Could not execute user's command\n");
+        pr_err("%s", "Could not execute user's command\n");
         print_errno();
         exit(EXIT_FAILURE);
     }

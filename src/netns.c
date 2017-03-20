@@ -19,7 +19,7 @@ int setup_veth_pair(int pid, const char *ip)
     ret = execute_bin_relative("veth_setup.sh", args);
 
     if (ret < 0)
-        printf("Could not setup veth pair\n");
+        pr_err("%s", "Could not setup veth pair\n");
 
     return ret;
 }
