@@ -49,8 +49,12 @@ err:
  */
 int execute_bin_relative(const char *relative_path, const char *args)
 {
-    char bin_dir[200];
-    char run[200];
+    char bin_dir[150];
+    char run[150];
+
+    memset(bin_dir, 0, sizeof bin_dir);
+    memset(run, 0, sizeof run);
+
     if (readlink("/proc/self/exe", bin_dir, sizeof bin_dir) < 0) {
         printf("Could not resolve path to current executable\n");
         goto err;
