@@ -105,21 +105,28 @@ err:
     return -1;
 }
 
-int ungz_image(const char *img_path, int init_pid, char *buff)
+int copy_image(const char *img_path, int init_pid, char *buff)
 {
     LOG_SETUP;
 
     char tmp_dir[100]; 
     snprintf(tmp_dir, sizeof tmp_dir, "/tmp/aucont_image_%d", init_pid);
-    char untar_command[strlen(img_path) + strlen(tmp_dir) + 15];
+    char tar_command[strlen(img_path) + 200];
+    char untar_command[200];
 
     if (mkdir(tmp_dir, 0777) < 0) {
         printf("Could not craete temp dir for image\n");
         goto err;
     }
 
-    snprintf(untar_command, sizeof untar_command, "tar -xzf %s -C %s", img_path, tmp_dir);
-    if (system(untar_command) < 0) {
+    snprintf(tar_command, sizeof tar_command, "tar -czvf /tmp/image_%d.tar.gz -C %s ../$(basename %s)", init_pid, img_path, img_path);
+    if (system(tar_command) != 0) {
+        printf("Could not copy image dir\n");
+        goto err;
+    }
+
+    snprintf(untar_command, sizeof untar_command, "tar -xzvf /tmp/image_%d.tar.gz -C %s", init_pid, tmp_dir);
+    if (system(untar_command) != 0) {
         printf("Could not extract image\n");
         goto err;
     }
