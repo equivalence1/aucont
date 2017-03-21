@@ -145,7 +145,8 @@ int init(void *arg)
         args[i++] = ((struct cmd_arg *)container_of(pos, struct cmd_arg, args))->arg;
     args[i] = NULL;
 
-    pr_msg("%d\n", info->pid);
+    printf("%d\n", info->pid);
+    fflush(stdout);
     if (info->opts->detached)
         daemonize();
 
