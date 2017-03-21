@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
         snprintf(args, sizeof args, "%s", argv[1]);
     if (argc == 3)
         snprintf(args, sizeof args, "%s %s", argv[1], argv[2]);
-    if (execute_bin_relative("aucont_stop.py", args) < 0) {
+    if (execute_bin_relative("aucont_stop.sh", args) < 0) {
         pr_err("%s", "Oops, something went wrong\n");
         return -1;
     }

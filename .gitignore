@@ -8,4 +8,4 @@ test/
 !bin/aucont_init
 !bin/aucont_list
 !bin/veth_setup.sh
-!bin/aucont_stop.py
+!bin/aucont_stop.sh
