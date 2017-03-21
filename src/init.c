@@ -107,6 +107,12 @@ int init(void *arg)
     }
     info->rootfs_path = rootfs_path;
 
+    char pid_str[10];
+    if (get_next_msg(info->pipe_fds[0], pid_str, sizeof pid_str) < 0) {
+        pr_warn("%s", "Could not receive pid in root pid ns\n");
+    }
+    info->pid = atoi(pid_str);
+
     if (wait_to_proceed(info->pipe_fds[0]) < 0) {
         pr_err("%s", "Can not proceed, aborting\n");
         exit(EXIT_FAILURE);
@@ -139,6 +145,7 @@ int init(void *arg)
         args[i++] = ((struct cmd_arg *)container_of(pos, struct cmd_arg, args))->arg;
     args[i] = NULL;
 
+    pr_msg("%d\n", info->pid);
     if (info->opts->detached)
         daemonize();
 
@@ -153,7 +160,7 @@ int init(void *arg)
 
 int clone_container_init(struct init_info *info)
 {
-    if (pipe2(info->pipe_fds, O_CLOEXEC) < 0)
+    if (pipe2(info->pipe_fds, O_CLOEXEC | O_DIRECT) < 0)
         goto err;
     void *stack = malloc(CHILD_STACK_SIZE);
     stack = (void *)((char *)stack + CHILD_STACK_SIZE);

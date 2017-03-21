@@ -40,6 +40,12 @@ int main(int argc, char *argv[])
         goto err;
     }
 
+    char pid_str[10];
+    snprintf(pid_str, sizeof pid_str, "%d", init.pid);
+    if (send_init(init.pipe_fds[1], pid_str) < 0) {
+        pr_warn("Could not send to init it's pid (%d) in root pid ns (thus it can not write it back)\n", init.pid);
+    }
+
     ret = setup_uid_mappings(&init);
     if (ret < 0)
         goto err;
