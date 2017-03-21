@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/stat.h>
 
 static const char *PROCEED = "proceed";
 static const char *FAIL = "fail";
@@ -39,6 +40,41 @@ int get_next_msg(int fd, char *buff, int len)
 err:
     print_errno();
     return -1;
+}
+
+static
+void daemonize(void)
+{
+    LOG_SETUP;
+
+    pid_t sid;
+    int fd;
+
+    /*
+     * Don't need to do fork() here as
+     * we already made clone() in aucont_start
+     */
+
+    sid = setsid();
+    if (sid < 0)
+        exit(EXIT_FAILURE);
+
+    if (chdir("/") < 0)
+        exit(EXIT_FAILURE);
+
+    fd = open("/dev/null", O_RDWR, 0);
+    if (fd != -1)
+    {
+        dup2(fd, STDIN_FILENO);
+        dup2(fd, STDOUT_FILENO);
+        dup2(fd, STDERR_FILENO);
+
+        if (fd > 2)
+            close (fd);
+    }
+
+    /* resettign File Creation Mask */
+    umask(027);
 }
 
 static
@@ -102,6 +138,9 @@ int init(void *arg)
     list_for_each(pos, info->opts->cmd_args)
         args[i++] = ((struct cmd_arg *)container_of(pos, struct cmd_arg, args))->arg;
     args[i] = NULL;
+
+    if (info->opts->detached)
+        daemonize();
 
     if (execve(cmd, (char * const*)args, NULL) < 0) {
         pr_err("%s", "Could not execute user's command\n");

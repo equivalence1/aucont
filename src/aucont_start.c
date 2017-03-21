@@ -23,30 +23,17 @@ int main(int argc, char *argv[])
     get_start_options(&opts, argc, argv);
     init.opts = &opts;
 
-    if (opts.detached) {
-        pr_info("%s", "daemonizing\n");
-        if (daemon(0, 0) < 0) {
-            pr_err("%s", "Could not daemonize container\n");
-            print_errno();
-        }
-    }
-
     int ret = clone_container_init(&init);
     if (ret < 0)
         exit(EXIT_FAILURE);
+
+    setuid(0);
+    setgid(0);
 
     char rootfs_path[100];
     if (copy_image(opts.image_path, init.pid, rootfs_path) < 0)
         goto err;
     init.rootfs_path = rootfs_path;
-
-    /* We should set uid after creating image
-     * because otherwise we wont have permission
-     * in cloned process (init) to modify it in any
-     * way
-     */
-    setuid(0);
-    setgid(0);
 
     if (send_init(init.pipe_fds[1], rootfs_path) < 0) {
         pr_err("%s", "Could not send image dir path\n");
