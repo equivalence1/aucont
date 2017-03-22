@@ -107,6 +107,9 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    seteuid(0);
+    setuid(0);
+
     if (pid == 0) {
         pr_success("%s", "Executing user's command\n");
         if (execve(cmd, args, NULL) < 0) {
