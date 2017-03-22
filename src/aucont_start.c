@@ -75,6 +75,13 @@ int main(int argc, char *argv[])
     if (opts.detached == 0) {
         int status;
         waitpid(init.pid, &status, 0);
+
+        char args[20];
+        snprintf(args, sizeof args, "%d %d", init.pid, 9);
+        if (execute_bin_relative("aucont_stop.sh", args) < 0) {
+            pr_err("%s", "Oops, something went wrong\n");
+            return -1;
+        }
     }
     exit(EXIT_SUCCESS);
 
