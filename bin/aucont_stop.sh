@@ -31,6 +31,7 @@ fi
 
 sleep 0.1 # for some reason cgdelete need some time after killing process
 
-cgdelete cpu,cpuacct:/cg_$1
+# cgdelete ALWAYS complains about something, but does its work properly, so > /dev/null
+cgdelete cpu,cpuacct:/cg_$1 > /dev/null
 
 exit 0
