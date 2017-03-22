@@ -17,6 +17,9 @@ exec_objects = $(exec_sources:.c=.o)
 
 all: $(bindir) $(objdir) aucont_start aucont_stop aucont_exec
 
+debug: CXXFLAGS += -DDEBUG
+debug: all
+
 $(bindir):
 	mkdir -p $(bindir)
 
