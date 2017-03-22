@@ -37,9 +37,10 @@ ip netns exec $netns_name ip link set lo up                                || ex
 echo 1 > /proc/sys/net/ipv4/ip_forward                                     || exit 1
 #&& echo "ip forwarding enabled"                                           || exit 1
 
-#if [ "$(iptables -nvL -t nat | grep -P \"MASQUERADE.*all.*wlan0\")" == "" ]; then
-#    iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE              && echo "nat rule added for wlan0"                                        || exit 1
-#fi
+if [ "$(iptables -nvL -t nat | grep -P \"MASQUERADE.*all.*wlan0\")" == "" ]; then
+    iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE              
+#&& echo "nat rule added for wlan0"                                        || exit 1
+fi
 
 # TODO for some reason /etc/netns resolv.conf does not work so I'm writing to global resolv.conf for now
 #mkdir -p /etc/netns/$netns_name
