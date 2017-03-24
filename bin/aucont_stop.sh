@@ -31,7 +31,14 @@ fi
 
 sleep 0.1 # for some reason cgdelete need some time after killing process
 
+if [[ `cat /proc/mounts | grep -c "cpu,cpuacct"` > 0 ]];
+then
+    cgroups="cpu,cpuacct"
+else
+    cgroups="cpu"
+fi
+
 # cgdelete ALWAYS complains about something, but does its work properly, so > /dev/null
-cgdelete cpu,cpuacct:/cg_$1 > /dev/null 2> /dev/null
+cgdelete $cgroups:/cg_$1 > /dev/null 2> /dev/null
 
 exit 0

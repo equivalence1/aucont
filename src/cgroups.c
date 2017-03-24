@@ -68,13 +68,25 @@ err:
 }
 
 static
+const char * get_cgroup_name()
+{
+    if (system("exit $(cat /proc/mounts | grep -c \"cpu,cpuacct\")") > 0) {
+        return "cpu,cpuacct";
+    } else {
+        return "cpu";
+    }
+}
+
+static
 int mount_cpu_hierarchy()
 {
     LOG_SETUP;
 
     char cmd[200];
-    // FIXME cpu and cpuacct might be separated
-    snprintf(cmd, sizeof cmd, "sudo mount -t cgroup -o cpu,cpuacct aucont_cpu_cgroup %s", HIERARCHY_PATH);
+    const char *cgroup_name;
+
+    cgroup_name = get_cgroup_name();
+    snprintf(cmd, sizeof cmd, "sudo mount -t cgroup -o %s aucont_cpu_cgroup %s", cgroup_name, HIERARCHY_PATH);
 
     if (system(cmd) != 0) {
         pr_err("%s", "Could not mount cgroup hierarchy\n");
