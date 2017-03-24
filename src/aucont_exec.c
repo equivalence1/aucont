@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <dirent.h>
 #include <unistd.h>
@@ -117,5 +118,9 @@ int main(int argc, char *argv[])
             print_errno();
             exit(EXIT_FAILURE);
         }
+    } else {
+        int status;
+        waitpid(pid, &status, 0);
+        exit(EXIT_SUCCESS);
     }
 }
